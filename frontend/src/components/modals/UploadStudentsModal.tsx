@@ -77,7 +77,7 @@ export default function UploadStudentsModal({ open, onOpenChange, brigades, onSu
       // Type check the result before using it
       if (isValidUploadResult(result)) {
         setUploadResult(result)
-        toast.success(result.message)
+        toast.success(result.message, { duration: 2000 })
         
         if (!result.errors || result.errors.length === 0) {
           setTimeout(() => {

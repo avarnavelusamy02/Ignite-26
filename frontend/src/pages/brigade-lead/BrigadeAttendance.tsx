@@ -81,7 +81,7 @@ export default function BrigadeAttendance() {
         status
       })
       
-      toast.success('Attendance marked successfully')
+      toast.success('Attendance marked successfully', { duration: 2000 })
       fetchAttendanceRecords()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to mark attendance')
@@ -103,7 +103,7 @@ export default function BrigadeAttendance() {
         status
       })
       
-      toast.success(`Attendance marked for ${selectedStudents.size} students`)
+      toast.success(`Attendance marked for ${selectedStudents.size} students`, { duration: 2000 })
       setSelectedStudents(new Set())
       fetchAttendanceRecords()
     } catch (error) {

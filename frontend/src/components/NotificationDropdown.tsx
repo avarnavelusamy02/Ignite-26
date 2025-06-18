@@ -138,21 +138,7 @@ export default function NotificationDropdown() {
           )}
         </div>
         
-        {notifications.length > 0 && (
-          <div className="p-2 border-t">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full"
-              onClick={() => {
-                // Navigate to notifications page
-                window.location.href = '/notifications'
-              }}
-            >
-              View all notifications
-            </Button>
-          </div>
-        )}
+    
       </DropdownMenuContent>
     </DropdownMenu>
   )

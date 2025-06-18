@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('token', response.token)
       setUser(response.user)
       console.log('Login successful:', response.user)
-      toast.success('Login successful!')
+      toast.success('Login successful!', { duration: 2000 })
       
       // Navigate based on role
       navigateBasedOnRole(response.user)
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await authApi.studentLogin(tempRollNumber, password)
       localStorage.setItem('token', response.token)
       setUser(response.user)
-      toast.success('Login successful!')
+      toast.success('Login successful!', { duration: 2000 })
       
       // Navigate based on role
       navigateBasedOnRole(response.user)
@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     localStorage.removeItem('token')
     setUser(null)
-    toast.success('Logged out successfully')
+    toast.success('Logged out successfully', { duration: 2000 })
     navigate('/login') // Navigate to login page after logout
   }
 

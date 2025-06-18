@@ -283,7 +283,7 @@ router.delete('/:id', requireAdmin, async (req, res) => {
     // Check if user is a member of any brigades (separate query)
     const brigadeMemberships = await prisma.brigade.findMany({
       where: {
-        members: {
+        students: {
           some: {
             id: id
           }

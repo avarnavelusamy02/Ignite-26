@@ -34,7 +34,7 @@ export default function StudentProfile() {
 
     try {
       await usersApi.changePassword(passwordData.currentPassword, passwordData.newPassword)
-      toast.success('Password changed successfully')
+      toast.success('Password changed successfully', { duration: 2000 })
       setShowPasswordModal(false)
       setPasswordData({
         currentPassword: '',

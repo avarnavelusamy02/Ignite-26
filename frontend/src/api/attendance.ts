@@ -5,6 +5,7 @@ export interface AttendanceQuery {
   eventDayId?: string
   brigadeId?: string
   session?: 'FN' | 'AN'
+  rollNumber?: string
   page?: number
   limit?: number
 }

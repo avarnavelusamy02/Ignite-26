@@ -64,10 +64,10 @@ export default function AdminBrigades() {
     try {
       if (selectedBrigade) {
         await brigadesApi.updateBrigade(selectedBrigade.id, formData)
-        toast.success('Brigade updated successfully')
+        toast.success('Brigade updated successfully', { duration: 2000 })
       } else {
         await brigadesApi.createBrigade(formData)
-        toast.success('Brigade created successfully')
+        toast.success('Brigade created successfully', { duration: 2000 })
       }
       
       fetchBrigades()
@@ -88,7 +88,7 @@ export default function AdminBrigades() {
 
     try {
       await brigadesApi.deleteBrigade(brigadeToDelete)
-      toast.success('Brigade deleted successfully')
+      toast.success('Brigade deleted successfully', { duration: 2000 })
       fetchBrigades()
     } catch (error) {
       toast.error('Failed to delete brigade')

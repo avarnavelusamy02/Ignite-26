@@ -67,10 +67,10 @@ export default function AdminEvents() {
         date: d.toISOString().split('T')[0],
         fnEnabled: true,
         anEnabled: true,
-        fnStartTime: '09:00',
-        fnEndTime: '09:30',
-        anStartTime: '13:30',
-        anEndTime: '14:00'
+        fnStartTime: '02:08',
+        fnEndTime: '02:15',
+        anStartTime: '02:16',
+        anEndTime: '02:20'
       })
     }
 
@@ -98,10 +98,10 @@ export default function AdminEvents() {
           startDate: formData.startDate,
           endDate: formData.endDate
         })
-        toast.success('Event updated successfully')
+        toast.success('Event updated successfully', { duration: 2000 })
       } else {
         await eventsApi.createEvent(formData)
-        toast.success('Event created successfully')
+        toast.success('Event created successfully', { duration: 2000 })
       }
       
       fetchEvents()
@@ -122,7 +122,7 @@ export default function AdminEvents() {
 
     try {
       await eventsApi.deleteEvent(eventToDelete)
-      toast.success('Event deleted successfully')
+      toast.success('Event deleted successfully', { duration: 2000 })
       fetchEvents()
     } catch (error) {
       toast.error('Failed to delete event')

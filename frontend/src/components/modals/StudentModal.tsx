@@ -65,10 +65,10 @@ export default function StudentModal({ open, onOpenChange, student, brigades, on
       
       if (student) {
         await studentsApi.updateStudent(student.id, formData)
-        toast.success('Student updated successfully')
+        toast.success('Student updated successfully', { duration: 2000 })
       } else {
         await studentsApi.createStudent(formData)
-        toast.success('Student created successfully')
+        toast.success('Student created successfully', { duration: 2000 })
       }
       
       onSaved()

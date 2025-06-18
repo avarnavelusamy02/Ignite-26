@@ -95,10 +95,10 @@ export default function AdminUsers() {
           lastName: formData.lastName,
           role: formData.role
         })
-        toast.success('User updated successfully')
+        toast.success('User updated successfully', { duration: 2000 })
       } else {
         await usersApi.createUser(formData)
-        toast.success('User created successfully')
+        toast.success('User created successfully', { duration: 2000 })
       }
       
       fetchUsers()
@@ -119,7 +119,7 @@ export default function AdminUsers() {
 
     try {
       await usersApi.resetPassword(selectedUser.id, passwordData.newPassword)
-      toast.success('Password reset successfully')
+      toast.success('Password reset successfully', { duration: 2000 })
       setShowPasswordModal(false)
       setPasswordData({ newPassword: '' })
       setSelectedUser(null)
@@ -140,7 +140,7 @@ export default function AdminUsers() {
     try {
       setIsDeleting(true)
       await usersApi.deleteUser(userToDelete.id)
-      toast.success('User deleted successfully')
+      toast.success('User deleted successfully', { duration: 2000 })
       fetchUsers()
       setDeleteDialogOpen(false)
       setUserToDelete(null)

@@ -7,17 +7,23 @@ import { logger } from '../utils/logger.js';
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Get user notifications
+// Get user notifications - FIXED VERSION
 router.get('/', async (req, res) => {
   try {
     const { page = 1, limit = 20, unreadOnly = false } = req.query;
     const skip = (page - 1) * limit;
 
+    // FIXED: Always filter by current user first, then check notification criteria
     let whereClause = {
-      OR: [
-        { notification: { isGlobal: true } },
-        { notification: { targetRole: req.user.role } },
-        { userId: req.user.id }
+      userId: req.user.id, // Always filter by current user
+      AND: [
+        {
+          OR: [
+            { notification: { isGlobal: true } },
+            { notification: { targetRole: req.user.role } },
+            { userId: req.user.id } // This is redundant now but kept for clarity
+          ]
+        }
       ]
     };
 

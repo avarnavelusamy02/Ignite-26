@@ -71,7 +71,7 @@ export default function AdminNotifications() {
         expiresAt: formData.expiresAt || undefined
       })
       
-      toast.success('Notification created successfully')
+      toast.success('Notification created successfully', { duration: 2000 })
       fetchNotifications()
       setShowModal(false)
       resetForm()
@@ -90,7 +90,7 @@ export default function AdminNotifications() {
 
     try {
       await notificationsApi.deleteNotification(notificationToDelete)
-      toast.success('Notification deleted successfully')
+      toast.success('Notification deleted successfully', { duration: 2000 })
       fetchNotifications()
     } catch (error) {
       toast.error('Failed to delete notification')

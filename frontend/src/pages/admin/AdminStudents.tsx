@@ -55,7 +55,7 @@ export default function AdminStudents() {
     try {
       setIsDeleting(true)
       await studentsApi.deleteStudent(studentToDelete)
-      toast.success('Student deleted successfully')
+      toast.success('Student deleted successfully', { duration: 2000 })
       fetchStudents() // Your existing function
       setDeleteDialogOpen(false)
       setStudentToDelete(null)
@@ -126,7 +126,7 @@ export default function AdminStudents() {
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-      toast.success('Template downloaded successfully')
+      toast.success('Template downloaded successfully', { duration: 2000 })
     } catch (error) {
       toast.error('Failed to download template')
     }

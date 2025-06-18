@@ -20,10 +20,12 @@ import AdminNotifications from './pages/admin/AdminNotifications'
 import BrigadeStudents from './pages/brigade-lead/BrigadeStudents'
 import BrigadeAttendance from './pages/brigade-lead/BrigadeAttendance'
 import BrigadeAnalytics from './pages/brigade-lead/BrigadeAnalytics'
+import BrigadeNotifications from './pages/brigade-lead/BrigadeNotifications'
 
 // Student Pages
 import StudentProfile from './pages/student/StudentProfile'
 import StudentAttendance from './pages/student/StudentAttendance'
+import StudentNotifications from './pages/student/StudentNotifications'
 
 // Shared Pages
 import NotFound from './pages/NotFound'
@@ -74,6 +76,7 @@ function App() {
             <Route path="/brigade/students" element={<BrigadeStudents />} />
             <Route path="/brigade/attendance" element={<BrigadeAttendance />} />
             <Route path="/brigade/analytics" element={<BrigadeAnalytics />} />
+            <Route path="/brigade/notifications" element={<BrigadeNotifications />} />
             <Route path="/" element={<Navigate to="/brigade/dashboard" replace />} />
           </>
         )}
@@ -84,6 +87,7 @@ function App() {
             <Route path="/student/dashboard" element={<StudentDashboard />} />
             <Route path="/student/profile" element={<StudentProfile />} />
             <Route path="/student/attendance" element={<StudentAttendance />} />
+            <Route path="/student/notifications" element={<StudentNotifications />} />
             <Route path="/" element={<Navigate to="/student/dashboard" replace />} />
           </>
         )}

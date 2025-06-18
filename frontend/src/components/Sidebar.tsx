@@ -9,7 +9,6 @@ import {
   Calendar,
   BarChart3,
   Bell,
-  Settings,
   X,
   GraduationCap,
   Shield,
@@ -29,7 +28,7 @@ const adminNavItems = [
   { name: 'Events', href: '/admin/events', icon: Calendar },
   { name: 'Attendance', href: '/admin/attendance', icon: UserCheck },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-  { name: 'Notifications', href: '/admin/notifications', icon: Bell },
+  { name: 'Notifications', href: '/admin/notifications', icon: Bell }
 ]
 
 const brigadeLeadNavItems = [
@@ -43,6 +42,7 @@ const studentNavItems = [
   { name: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboard },
   { name: 'Profile', href: '/student/profile', icon: Users },
   { name: 'Attendance', href: '/student/attendance', icon: BookOpen },
+  { name: 'Notifications', href: '/student/notifications', icon: Bell }
 ]
 
 export default function Sidebar({ open, setOpen }: SidebarProps) {

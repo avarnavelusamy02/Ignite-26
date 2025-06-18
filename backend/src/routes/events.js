@@ -27,44 +27,168 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get current active event
+// Get current active event - WORKING WITH YOUR DATA
 router.get('/current', async (req, res) => {
   try {
     const now = new Date();
+    console.log('=== DEBUG WITH YOUR DATA ===');
+    console.log('Current time:', now);
+    console.log('Current time (HH:MM):', now.toTimeString().substring(0, 5));
+    console.log('Current date ISO:', now.toISOString());
+    
+    // Step 1: Check all events
+    const allEvents = await prisma.event.findMany({
+      select: {
+        id: true,
+        name: true,
+        isActive: true,
+        startDate: true,
+        endDate: true
+      }
+    });
+    console.log('All events:', JSON.stringify(allEvents, null, 2));
+    
+    // Step 2: Check all event days
+    const allEventDays = await prisma.eventDay.findMany({
+      select: {
+        id: true,
+        eventId: true,
+        date: true,
+        fnStartTime: true,
+        fnEndTime: true,
+        anStartTime: true,
+        anEndTime: true,
+        isActive: true
+      }
+    });
+    console.log('All event days:', JSON.stringify(allEventDays, null, 2));
+    
+    // Step 3: Find the event that has today's event day
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    
+    console.log('Today range:', todayStart, 'to', todayEnd);
     
     const currentEvent = await prisma.event.findFirst({
       where: {
         isActive: true,
-        startDate: { lte: now },
-        endDate: { gte: now }
+        eventDays: {
+          some: {
+            date: {
+              gte: todayStart,
+              lte: todayEnd
+            },
+            isActive: true
+          }
+        }
       },
       include: {
         eventDays: {
+          where: {
+            date: {
+              gte: todayStart,
+              lte: todayEnd
+            },
+            isActive: true
+          },
           orderBy: { date: 'asc' }
         }
       }
     });
-
-    if (!currentEvent) {
-      return res.status(404).json({ error: 'No active event found' });
-    }
-
-    // Find current day
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
     
-    const currentDay = currentEvent.eventDays.find(day => {
-      const eventDate = new Date(day.date);
-      eventDate.setHours(0, 0, 0, 0);
-      return eventDate.getTime() === today.getTime();
-    });
-
+    console.log('Current event found:', !!currentEvent);
+    console.log('Current event details:', JSON.stringify(currentEvent, null, 2));
+    
+    if (!currentEvent || currentEvent.eventDays.length === 0) {
+      return res.status(404).json({ 
+        error: 'No active event found for today',
+        debug: {
+          totalEvents: allEvents.length,
+          totalEventDays: allEventDays.length,
+          todayRange: `${todayStart.toISOString()} to ${todayEnd.toISOString()}`
+        }
+      });
+    }
+    
+    const currentDay = currentEvent.eventDays[0];
+    console.log('Today event day:', JSON.stringify(currentDay, null, 2));
+    
+    // Helper function to convert time string to today's Date object
+    const timeStringToDate = (timeString) => {
+      if (!timeString || typeof timeString !== 'string') {
+        return null;
+      }
+      const today = new Date();
+      const [hours, minutes] = timeString.split(':').map(Number);
+      today.setHours(hours, minutes, 0, 0);
+      return today;
+    };
+    
+    // Check which session is currently active
+    let activeSession = null;
+    let sessionStatus = {};
+    
+    // Check FN session (02:08 - 02:15)
+    if (currentDay.fnEnabled) {
+      const fnStart = timeStringToDate(currentDay.fnStartTime);
+      const fnEnd = timeStringToDate(currentDay.fnEndTime);
+      
+      sessionStatus.fn = {
+        enabled: true,
+        time: `${currentDay.fnStartTime} - ${currentDay.fnEndTime}`,
+        startTime: fnStart?.toISOString(),
+        endTime: fnEnd?.toISOString(),
+        isActive: fnStart && fnEnd && now >= fnStart && now <= fnEnd
+      };
+      
+      console.log('FN Session check:', sessionStatus.fn);
+      
+      if (sessionStatus.fn.isActive) {
+        activeSession = 'FN';
+      }
+    }
+    
+    // Check AN session (02:16 - 02:20)
+    if (currentDay.anEnabled && !activeSession) {
+      const anStart = timeStringToDate(currentDay.anStartTime);
+      const anEnd = timeStringToDate(currentDay.anEndTime);
+      
+      sessionStatus.an = {
+        enabled: true,
+        time: `${currentDay.anStartTime} - ${currentDay.anEndTime}`,
+        startTime: anStart?.toISOString(),
+        endTime: anEnd?.toISOString(),
+        isActive: anStart && anEnd && now >= anStart && now <= anEnd
+      };
+      
+      console.log('AN Session check:', sessionStatus.an);
+      
+      if (sessionStatus.an.isActive) {
+        activeSession = 'AN';
+      }
+    }
+    
+    console.log('Active session:', activeSession);
+    console.log('Session status:', sessionStatus);
+    
+    // Return the event even if no session is currently active (for testing)
     res.json({
       event: currentEvent,
-      currentDay: currentDay || null
+      currentDay: currentDay,
+      activeSession: activeSession,
+      sessionStatus: sessionStatus,
+      debug: {
+        currentTime: now.toISOString(),
+        currentTimeString: now.toTimeString().substring(0, 5),
+        foundEvent: !!currentEvent,
+        foundTodayEventDay: !!currentDay
+      }
     });
+    
   } catch (error) {
-    logger.error('Get current event error:', error);
+    console.error('Get current event error:', error);
     res.status(500).json({ error: 'Failed to fetch current event' });
   }
 });
