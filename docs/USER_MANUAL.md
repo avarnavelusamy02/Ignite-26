@@ -1,4 +1,4 @@
-# Ignite 2026 Attendance Management System - User Manual
+# Ignite Attendance Management System - User Manual
 
 ## Table of Contents
 1. [Getting Started](#getting-started)

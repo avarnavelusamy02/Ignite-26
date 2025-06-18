@@ -1,8 +1,8 @@
-# Features Overview - Ignite 2026 Attendance Management System
+# Features Overview - Ignite Attendance Management System
 
 ## System Overview
 
-The Ignite 2026 Attendance Management System is a comprehensive web-based solution designed to streamline attendance tracking for technical events. The system supports multiple user roles, real-time attendance marking, detailed analytics, and efficient brigade management.
+The Ignite Attendance Management System is a comprehensive web-based solution designed to streamline attendance tracking for technical events. The system supports multiple user roles, real-time attendance marking, detailed analytics, and efficient brigade management.
 
 ## Core Features
 

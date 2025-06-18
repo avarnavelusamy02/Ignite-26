@@ -1,8 +1,8 @@
-# Deployment Guide - Ignite 2026 Attendance Management System
+# Deployment Guide - Ignite Attendance Management System
 
 ## Overview
 
-This guide covers the deployment of the Ignite 2026 Attendance Management System to production environments. The system consists of a Node.js backend with PostgreSQL database and a React frontend.
+This guide covers the deployment of the Ignite Attendance Management System to production environments. The system consists of a Node.js backend with PostgreSQL database and a React frontend.
 
 ## Prerequisites
 

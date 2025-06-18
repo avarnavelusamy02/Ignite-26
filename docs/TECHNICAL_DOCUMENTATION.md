@@ -1,9 +1,9 @@
-# Technical Documentation - Ignite 2026 Attendance Management System
+# Technical Documentation - Ignite Attendance Management System
 
 ## Architecture Overview
 
 ### System Architecture
-The Ignite 2026 Attendance Management System follows a modern three-tier architecture:
+The Ignite Attendance Management System follows a modern three-tier architecture:
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐

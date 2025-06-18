@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Ignite 2026 Attendance Management System uses PostgreSQL as its primary database with Prisma as the ORM. The schema is designed to support multi-role user management, brigade organization, event management, and comprehensive attendance tracking.
+The Ignite Attendance Management System uses PostgreSQL as its primary database with Prisma as the ORM. The schema is designed to support multi-role user management, brigade organization, event management, and comprehensive attendance tracking.
 
 ## Schema Design Principles
 

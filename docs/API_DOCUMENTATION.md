@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Ignite 2026 Attendance Management System provides a comprehensive REST API for managing attendance, users, students, brigades, events, and analytics.
+The Ignite Attendance Management System provides a comprehensive REST API for managing attendance, users, students, brigades, events, and analytics.
 
 **Base URL:** `http://localhost:5000/api`
 

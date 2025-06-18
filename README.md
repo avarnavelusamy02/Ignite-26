@@ -1,4 +1,4 @@
-# Ignite 2026 - Attendance Management System
+# Ignite - Attendance Management System
 
 A comprehensive attendance management system built for Kumaraguru Institutions' Ignite 2026 freshers induction program.
 
