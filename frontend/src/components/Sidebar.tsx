@@ -12,7 +12,8 @@ import {
   X,
   GraduationCap,
   Shield,
-  BookOpen
+  BookOpen,
+  FileText
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -23,6 +24,7 @@ interface SidebarProps {
 const adminNavItems = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Students', href: '/admin/students', icon: GraduationCap },
+  { name: 'Student Summary', href: '/admin/student-summary', icon: FileText },
   { name: 'Brigades', href: '/admin/brigades', icon: Shield },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Events', href: '/admin/events', icon: Calendar },

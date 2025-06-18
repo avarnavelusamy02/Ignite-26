@@ -15,6 +15,7 @@ import AdminEvents from './pages/admin/AdminEvents'
 import AdminAttendance from './pages/admin/AdminAttendance'
 import AdminAnalytics from './pages/admin/AdminAnalytics'
 import AdminNotifications from './pages/admin/AdminNotifications'
+import AdminStudentSummary from './pages/admin/AdminStudentSummary'
 
 // Brigade Lead Pages
 import BrigadeStudents from './pages/brigade-lead/BrigadeStudents'
@@ -59,6 +60,7 @@ function App() {
           <>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/students" element={<AdminStudents />} />
+            <Route path="/admin/student-summary" element={<AdminStudentSummary />} />
             <Route path="/admin/brigades" element={<AdminBrigades />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/events" element={<AdminEvents />} />
