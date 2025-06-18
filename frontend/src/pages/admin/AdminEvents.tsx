@@ -67,10 +67,10 @@ export default function AdminEvents() {
         date: d.toISOString().split('T')[0],
         fnEnabled: true,
         anEnabled: true,
-        fnStartTime: '02:08',
-        fnEndTime: '02:15',
-        anStartTime: '02:16',
-        anEndTime: '02:20'
+        fnStartTime: '09:00',
+        fnEndTime: '09:30',
+        anStartTime: '13:30',
+        anEndTime: '14:00'
       })
     }
 
