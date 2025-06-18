@@ -10,6 +10,7 @@ import { Search, Plus, Edit, Trash2, Users } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 
 export default function AdminBrigades() {
@@ -18,6 +19,8 @@ export default function AdminBrigades() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false)
+  const [brigadeToDelete, setBrigadeToDelete] = useState<string | null>(null)
   const [selectedBrigade, setSelectedBrigade] = useState<Brigade | null>(null)
   const [formData, setFormData] = useState({
     name: '',
@@ -75,16 +78,29 @@ export default function AdminBrigades() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this brigade?')) return
+  const handleDeleteClick = (id: string) => {
+    setBrigadeToDelete(id)
+    setShowDeleteAlert(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!brigadeToDelete) return
 
     try {
-      await brigadesApi.deleteBrigade(id)
+      await brigadesApi.deleteBrigade(brigadeToDelete)
       toast.success('Brigade deleted successfully')
       fetchBrigades()
     } catch (error) {
       toast.error('Failed to delete brigade')
+    } finally {
+      setShowDeleteAlert(false)
+      setBrigadeToDelete(null)
     }
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteAlert(false)
+    setBrigadeToDelete(null)
   }
 
   const resetForm = () => {
@@ -169,7 +185,7 @@ export default function AdminBrigades() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDelete(brigade.id)}
+                      onClick={() => handleDeleteClick(brigade.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -194,7 +210,7 @@ export default function AdminBrigades() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Edit/Create Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent>
           <DialogHeader>
@@ -250,6 +266,22 @@ export default function AdminBrigades() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation AlertDialog */}
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the brigade and remove all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDeleteCancel}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -20,11 +20,11 @@ async function main() {
     },
   });
 
-  // Create brigade leads (only 2)
+  // Create brigade leads
   const brigadeLeadPassword = await bcrypt.hash('lead123', 10);
   const brigadeLeads = [];
 
-  for (let i = 1; i <= 2; i++) {
+  for (let i = 1; i <= 5; i++) {
     const lead = await prisma.user.upsert({
       where: { email: `lead${i}@ignite2026.com` },
       update: {},
@@ -55,11 +55,11 @@ async function main() {
     brigades.push(brigade);
   }
 
-  // Create sample students (only 6)
+  // Create sample students
   const studentPassword = await bcrypt.hash('student123', 10);
   const students = [];
 
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= 50; i++) {
     const brigadeIndex = (i - 1) % brigades.length;
     const tempRollNumber = `IG2026${String(i).padStart(3, '0')}`;
     
@@ -92,7 +92,64 @@ async function main() {
     students.push(student);
   }
 
+  // Create sample event
+  const event = await prisma.event.upsert({
+    where: { id: 'ignite-2026-main' },
+    update: {},
+    create: {
+      id: 'ignite-2026-main',
+      name: 'Ignite 2026',
+      description: 'Annual technical fest at Kumaraguru Institutions',
+      startDate: new Date('2026-03-15'),
+      endDate: new Date('2026-03-17'),
+    },
+  });
 
+  // Create event days
+  const eventDays = [];
+  for (let i = 0; i < 3; i++) {
+    const date = new Date('2026-03-15');
+    date.setDate(date.getDate() + i);
+    
+    const eventDay = await prisma.eventDay.create({
+      data: {
+        eventId: event.id,
+        date: date,
+        fnEnabled: true,
+        anEnabled: true,
+        fnStartTime: '09:00',
+        fnEndTime: '09:30',
+        anStartTime: '14:00',
+        anEndTime: '14:30',
+      },
+    });
+    eventDays.push(eventDay);
+  }
+
+  // Create sample attendance records
+  for (const eventDay of eventDays.slice(0, 1)) { // Only for the first day
+    for (let i = 0; i < 30; i++) { // First 30 students
+      // FN session attendance
+      await prisma.attendanceRecord.create({
+        data: {
+          studentId: students[i].id,
+          eventDayId: eventDay.id,
+          session: 'FN',
+          status: Math.random() > 0.1 ? 'PRESENT' : 'ABSENT',
+        },
+      });
+
+      // AN session attendance
+      await prisma.attendanceRecord.create({
+        data: {
+          studentId: students[i].id,
+          eventDayId: eventDay.id,
+          session: 'AN',
+          status: Math.random() > 0.15 ? 'PRESENT' : 'ABSENT',
+        },
+      });
+    }
+  }
 
   // Create sample notifications
   await prisma.notification.create({
@@ -116,10 +173,9 @@ async function main() {
   console.log('✅ Database seeding completed successfully!');
   console.log('\n📧 Login Credentials:');
   console.log('Admin: admin@ignite2026.com / admin123');
-  console.log('Brigade Lead 1: lead1@ignite2026.com / lead123');
-  console.log('Brigade Lead 2: lead2@ignite2026.com / lead123');
-  console.log('Students: student1@ignite2026.com to student6@ignite2026.com / student123');
-  console.log('Student Rolls: IG2026001 to IG2026006');
+  console.log('Brigade Lead: lead1@ignite2026.com / lead123');
+  console.log('Student: student1@ignite2026.com / student123');
+  console.log('Student Roll: IG2026001');
 }
 
 main()

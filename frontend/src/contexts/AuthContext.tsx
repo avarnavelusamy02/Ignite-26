@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom' // Add this import
 import { authApi } from '@/api/auth'
 import { User } from '@/types'
 import { toast } from 'sonner'
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -39,12 +41,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const navigateBasedOnRole = (user: User) => {
+    switch (user.role) {
+      case 'ADMIN':
+        navigate('/admin/dashboard')
+        break
+      case 'BRIGADE_LEAD':
+        navigate('/brigade/dashboard')
+        break
+      case 'STUDENT':
+        navigate('/student/dashboard')
+        break
+      default:
+        // Handle unknown roles by navigating to 404
+        navigate('/404')
+        break
+    }
+  }
+
   const login = async (email: string, password: string) => {
     try {
       const response = await authApi.login(email, password)
       localStorage.setItem('token', response.token)
       setUser(response.user)
+      console.log('Login successful:', response.user)
       toast.success('Login successful!')
+      
+      // Navigate based on role
+      navigateBasedOnRole(response.user)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Login failed')
       throw error
@@ -57,6 +81,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('token', response.token)
       setUser(response.user)
       toast.success('Login successful!')
+      
+      // Navigate based on role
+      navigateBasedOnRole(response.user)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Login failed')
       throw error
@@ -67,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('token')
     setUser(null)
     toast.success('Logged out successfully')
+    navigate('/login') // Navigate to login page after logout
   }
 
   return (

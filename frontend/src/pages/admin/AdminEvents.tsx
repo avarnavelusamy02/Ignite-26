@@ -4,34 +4,39 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { eventsApi } from '@/api/events'
-import { Event, EventDay } from '@/types'
+import { Event } from '@/types'
 import { Search, Plus, Edit, Trash2, Calendar, Clock } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { toast } from 'sonner'
 import { formatDate, formatTime } from '@/lib/utils'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
+
+interface EventDayForm {
+  date: string
+  fnEnabled: boolean
+  anEnabled: boolean
+  fnStartTime: string
+  fnEndTime: string
+  anStartTime: string
+  anEndTime: string
+}
 
 export default function AdminEvents() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     startDate: '',
     endDate: '',
-    eventDays: [] as Array<{
-      date: string
-      fnEnabled: boolean
-      anEnabled: boolean
-      fnStartTime: string
-      fnEndTime: string
-      anStartTime: string
-      anEndTime: string
-    }>
+    eventDays: [] as EventDayForm[]
   })
 
   useEffect(() => {
@@ -55,7 +60,7 @@ export default function AdminEvents() {
 
     const start = new Date(formData.startDate)
     const end = new Date(formData.endDate)
-    const days = []
+    const days: EventDayForm[] = []
 
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       days.push({
@@ -64,8 +69,8 @@ export default function AdminEvents() {
         anEnabled: true,
         fnStartTime: '09:00',
         fnEndTime: '09:30',
-        anStartTime: '14:00',
-        anEndTime: '14:30'
+        anStartTime: '13:30',
+        anEndTime: '14:00'
       })
     }
 
@@ -107,16 +112,29 @@ export default function AdminEvents() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this event?')) return
+  const handleDeleteClick = (id: string) => {
+    setEventToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!eventToDelete) return
 
     try {
-      await eventsApi.deleteEvent(id)
+      await eventsApi.deleteEvent(eventToDelete)
       toast.success('Event deleted successfully')
       fetchEvents()
     } catch (error) {
       toast.error('Failed to delete event')
     }
+
+    setShowDeleteDialog(false)
+    setEventToDelete(null)
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteDialog(false)
+    setEventToDelete(null)
   }
 
   const resetForm = () => {
@@ -228,7 +246,7 @@ export default function AdminEvents() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(event.id)}
+                        onClick={() => handleDeleteClick(event.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -240,7 +258,7 @@ export default function AdminEvents() {
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm">Event Days:</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {event.eventDays.map((day, index) => (
+                    {event.eventDays.map((day) => (
                       <div key={day.id} className="p-3 bg-gray-50 rounded-lg text-sm">
                         <div className="font-medium">{formatDate(day.date)}</div>
                         <div className="text-gray-600 mt-1">
@@ -261,7 +279,7 @@ export default function AdminEvents() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Event Form Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -352,6 +370,23 @@ export default function AdminEvents() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Alert Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the event
+              and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDeleteCancel}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

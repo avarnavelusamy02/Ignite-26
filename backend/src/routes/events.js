@@ -300,13 +300,20 @@ router.delete('/:id', requireAdmin, async (req, res) => {
       });
     }
 
-    // Soft delete
-    await prisma.event.update({
-      where: { id },
-      data: { isActive: false }
+    // Hard delete with cascade - use transaction for data integrity
+    await prisma.$transaction(async (tx) => {
+      // Delete related eventDays first (if any without attendance records)
+      await tx.eventDay.deleteMany({
+        where: { eventId: id }
+      });
+
+      // Then delete the event
+      await tx.event.delete({
+        where: { id }
+      });
     });
 
-    logger.info(`Event deleted: ${event.name} by ${req.user.email}`);
+    logger.info(`Event permanently deleted: ${event.name} by ${req.user.email}`);
     res.json({ message: 'Event deleted successfully' });
   } catch (error) {
     logger.error('Delete event error:', error);

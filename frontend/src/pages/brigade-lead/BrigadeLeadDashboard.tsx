@@ -5,10 +5,12 @@ import { DashboardStats } from '@/types'
 import { Users, Shield, UserCheck, TrendingUp } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
+import { useNavigate } from 'react-router-dom'
 
 export default function BrigadeLeadDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetchDashboardStats()
@@ -213,17 +215,17 @@ export default function BrigadeLeadDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+            <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => navigate('/brigade/students')}>
               <Users className="h-8 w-8 text-blue-500 mb-2" />
               <h3 className="font-medium">Manage Students</h3>
               <p className="text-sm text-gray-500">View and manage brigade students</p>
             </div>
-            <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+            <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => navigate('/brigade/attendance')}>
               <UserCheck className="h-8 w-8 text-green-500 mb-2" />
               <h3 className="font-medium">Mark Attendance</h3>
               <p className="text-sm text-gray-500">Record student attendance</p>
             </div>
-            <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+            <div className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => navigate('/brigade/analytics')}>
               <TrendingUp className="h-8 w-8 text-purple-500 mb-2" />
               <h3 className="font-medium">View Reports</h3>
               <p className="text-sm text-gray-500">Attendance analytics and reports</p>

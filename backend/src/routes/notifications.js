@@ -267,13 +267,12 @@ router.delete('/:id', requireAdmin, async (req, res) => {
       return res.status(404).json({ error: 'Notification not found' });
     }
 
-    // Soft delete
-    await prisma.notification.update({
-      where: { id },
-      data: { isActive: false }
+    // Hard delete - permanently remove from database
+    await prisma.notification.delete({
+      where: { id }
     });
 
-    logger.info(`Notification deleted: ${notification.title} by ${req.user.email}`);
+    logger.info(`Notification permanently deleted: ${notification.title} by ${req.user.email}`);
     res.json({ message: 'Notification deleted successfully' });
   } catch (error) {
     logger.error('Delete notification error:', error);

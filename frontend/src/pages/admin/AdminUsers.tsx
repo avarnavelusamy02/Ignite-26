@@ -4,13 +4,23 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { usersApi } from '@/api/users'
-import { User, PaginatedResponse } from '@/types'
+import { User } from '@/types'
 import { Search, Plus, Edit, Trash2, Key } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { toast } from 'sonner'
 import { formatDateTime } from '@/lib/utils'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([])
@@ -36,6 +46,11 @@ export default function AdminUsers() {
   const [passwordData, setPasswordData] = useState({
     newPassword: ''
   })
+  
+  // Delete confirmation dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchUsers()
@@ -113,16 +128,32 @@ export default function AdminUsers() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return
+  // Updated delete functions
+  const handleDeleteClick = (user: User) => {
+    setUserToDelete(user)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return
 
     try {
-      await usersApi.deleteUser(id)
+      setIsDeleting(true)
+      await usersApi.deleteUser(userToDelete.id)
       toast.success('User deleted successfully')
       fetchUsers()
+      setDeleteDialogOpen(false)
+      setUserToDelete(null)
     } catch (error) {
       toast.error('Failed to delete user')
+    } finally {
+      setIsDeleting(false)
     }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+    setUserToDelete(null)
   }
 
   const resetForm = () => {
@@ -291,7 +322,7 @@ export default function AdminUsers() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(user.id)}
+                            onClick={() => handleDeleteClick(user)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -465,6 +496,34 @@ export default function AdminUsers() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete{' '}
+              <span className="font-medium">
+                {userToDelete?.firstName} {userToDelete?.lastName}
+              </span>
+              ? This action cannot be undone and will permanently delete their account and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDeleteCancel} disabled={isDeleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete User'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -10,6 +10,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { toast } from 'sonner'
 import { formatDateTime } from '@/lib/utils'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 
 export default function AdminNotifications() {
@@ -23,6 +24,8 @@ export default function AdminNotifications() {
     itemsPerPage: 10
   })
   const [showModal, setShowModal] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [notificationToDelete, setNotificationToDelete] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     message: '',
@@ -52,9 +55,7 @@ export default function AdminNotifications() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+  const handleSubmit = async () => {
     if (!formData.title || !formData.message) {
       toast.error('Please fill in all required fields')
       return
@@ -79,16 +80,29 @@ export default function AdminNotifications() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this notification?')) return
+  const handleDeleteClick = (id: string) => {
+    setNotificationToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!notificationToDelete) return
 
     try {
-      await notificationsApi.deleteNotification(id)
+      await notificationsApi.deleteNotification(notificationToDelete)
       toast.success('Notification deleted successfully')
       fetchNotifications()
     } catch (error) {
       toast.error('Failed to delete notification')
+    } finally {
+      setShowDeleteDialog(false)
+      setNotificationToDelete(null)
     }
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteDialog(false)
+    setNotificationToDelete(null)
   }
 
   const resetForm = () => {
@@ -204,7 +218,7 @@ export default function AdminNotifications() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(notification.id)}
+                        onClick={() => handleDeleteClick(notification.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -259,7 +273,7 @@ export default function AdminNotifications() {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">Title *</Label>
               <Input
@@ -345,19 +359,34 @@ export default function AdminNotifications() {
 
             <div className="flex justify-end space-x-2 pt-4">
               <Button
-                type="button"
                 variant="outline"
                 onClick={() => setShowModal(false)}
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button onClick={handleSubmit}>
                 Create Notification
               </Button>
             </div>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation AlertDialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the notification.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDeleteCancel}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

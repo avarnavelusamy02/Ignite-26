@@ -11,7 +11,7 @@
     "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build",
     "start": "cd backend && npm start",
-    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "db:setup": "cd backend && npx prisma generate && npx prisma db push && npx prisma db seed"
   },
   "keywords": [

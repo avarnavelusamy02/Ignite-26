@@ -256,8 +256,8 @@ router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Prevent self-deletion
-    if (id === req.user.id) {
+    // Prevent self-deletion - Fix: Convert both to string for comparison
+    if (id === req.user.id.toString() || id.toString() === req.user.id.toString()) {
       return res.status(400).json({ error: 'Cannot delete your own account' });
     }
 
@@ -273,28 +273,46 @@ router.delete('/:id', requireAdmin, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Check if user has dependencies
+    // Check if user has dependencies - Check leadership
     if (user.brigadeLeadBrigades.length > 0) {
       return res.status(400).json({ 
-        error: 'Cannot delete user who is leading brigades. Please reassign brigades first.' 
+        error: 'Cannot delete user who is leading brigades. Please reassign brigade leadership first.' 
       });
     }
 
-    // Soft delete
-    await prisma.user.update({
-      where: { id },
-      data: { isActive: false }
+    // Check if user is a member of any brigades (separate query)
+    const brigadeMemberships = await prisma.brigade.findMany({
+      where: {
+        members: {
+          some: {
+            id: id
+          }
+        }
+      }
     });
 
-    // Also deactivate associated student if exists
-    if (user.student) {
-      await prisma.student.update({
-        where: { id: user.student.id },
-        data: { isActive: false }
+    if (brigadeMemberships.length > 0) {
+      return res.status(400).json({ 
+        error: 'Cannot delete user who is a member of brigades. Please remove from brigades first.' 
       });
     }
 
-    logger.info(`User deleted: ${user.email} by ${req.user.email}`);
+    // Hard delete with transaction for data integrity
+    await prisma.$transaction(async (tx) => {
+      // Delete associated student first if exists
+      if (user.student) {
+        await tx.student.delete({
+          where: { id: user.student.id }
+        });
+      }
+
+      // Then delete the user
+      await tx.user.delete({
+        where: { id }
+      });
+    });
+
+    logger.info(`User permanently deleted: ${user.email} by ${req.user.email}`);
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     logger.error('Delete user error:', error);

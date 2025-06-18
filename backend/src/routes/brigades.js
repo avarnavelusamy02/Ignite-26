@@ -223,17 +223,16 @@ router.delete('/:id', requireAdmin, async (req, res) => {
       });
     }
 
-    // Soft delete
-    await prisma.brigade.update({
-      where: { id },
-      data: { isActive: false }
+    // Hard delete - permanently remove from database
+    await prisma.brigade.delete({
+      where: { id }
     });
 
-    logger.info(`Brigade deleted: ${brigade.name} by ${req.user.email}`);
+    logger.info(`Brigade permanently deleted: ${brigade.name} by ${req.user.email}`);
     res.json({ message: 'Brigade deleted successfully' });
   } catch (error) {
     logger.error('Delete brigade error:', error);
-    res.status(500).json({ error: 'Failed to delete brigade' });
+    res.status(500).json({ error: 'Failed to delete brigade with active students.' });
   }
 });
 

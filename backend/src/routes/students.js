@@ -211,7 +211,7 @@ router.put('/:id', requireAdminOrBrigadeLead, [
     }
 
     const { id } = req.params;
-    const updateData = req.body;
+    const { brigadeId, createUserAccount, ...otherData } = req.body;
 
     // Check if student exists and get permissions
     const existingStudent = await prisma.student.findUnique({
@@ -235,6 +235,25 @@ router.put('/:id', requireAdminOrBrigadeLead, [
       }
     }
 
+    // Prepare update data with proper brigade relation handling
+    const updateData = {
+      ...otherData,
+      // Handle brigade relation update
+      ...(brigadeId !== undefined && {
+        brigade: brigadeId ? {
+          connect: { id: brigadeId }
+        } : {
+          disconnect: true
+        }
+      })
+    };
+
+    // Remove any fields that shouldn't be updated directly
+    delete updateData.brigadeId;
+    delete updateData.createUserAccount;
+
+    console.log('Update data being sent to Prisma:', JSON.stringify(updateData, null, 2));
+
     const student = await prisma.student.update({
       where: { id },
       data: updateData,
@@ -250,7 +269,12 @@ router.put('/:id', requireAdminOrBrigadeLead, [
     res.json(student);
   } catch (error) {
     logger.error('Update student error:', error);
-    res.status(500).json({ error: 'Failed to update student' });
+    console.error('Detailed error:', {
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    });
+    res.status(500).json({ error: 'Failed to update student', details: error.message });
   }
 });
 
@@ -258,22 +282,21 @@ router.put('/:id', requireAdminOrBrigadeLead, [
 router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-
+    
     const student = await prisma.student.findUnique({
       where: { id }
     });
-
+    
     if (!student) {
       return res.status(404).json({ error: 'Student not found' });
     }
-
-    // Soft delete
-    await prisma.student.update({
-      where: { id },
-      data: { isActive: false }
+    
+    // Hard delete - actually removes from database
+    await prisma.student.delete({
+      where: { id }
     });
-
-    logger.info(`Student deleted: ${student.tempRollNumber} by ${req.user.email}`);
+    
+    logger.info(`Student permanently deleted: ${student.tempRollNumber} by ${req.user.email}`);
     res.json({ message: 'Student deleted successfully' });
   } catch (error) {
     logger.error('Delete student error:', error);

@@ -8,6 +8,13 @@ import { toast } from 'sonner'
 import { Upload, FileText, AlertCircle } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
+// Add type definition for upload result
+interface UploadResult {
+  message: string
+  imported: number
+  errors?: string[]
+}
+
 interface UploadStudentsModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -20,7 +27,7 @@ export default function UploadStudentsModal({ open, onOpenChange, brigades, onSu
   const [file, setFile] = useState<File | null>(null)
   const [brigadeId, setBrigadeId] = useState('')
   const [createUserAccounts, setCreateUserAccounts] = useState(false)
-  const [uploadResult, setUploadResult] = useState<any>(null)
+  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -41,6 +48,18 @@ export default function UploadStudentsModal({ open, onOpenChange, brigades, onSu
     }
   }
 
+  // Type guard to check if result has expected properties
+  const isValidUploadResult = (result: unknown): result is UploadResult => {
+    return (
+      typeof result === 'object' &&
+      result !== null &&
+      'message' in result &&
+      'imported' in result &&
+      typeof (result as any).message === 'string' &&
+      typeof (result as any).imported === 'number'
+    )
+  }
+
   const handleUpload = async () => {
     if (!file) {
       toast.error('Please select a file')
@@ -55,15 +74,22 @@ export default function UploadStudentsModal({ open, onOpenChange, brigades, onSu
         createUserAccounts
       })
       
-      setUploadResult(result)
-      toast.success(result.message)
-      
-      if (!result.errors || result.errors.length === 0) {
-        setTimeout(() => {
-          onSuccess()
-          onOpenChange(false)
-          resetForm()
-        }, 2000)
+      // Type check the result before using it
+      if (isValidUploadResult(result)) {
+        setUploadResult(result)
+        toast.success(result.message)
+        
+        if (!result.errors || result.errors.length === 0) {
+          setTimeout(() => {
+            onSuccess()
+            onOpenChange(false)
+            resetForm()
+          }, 2000)
+        }
+      } else {
+        // Handle unexpected result format
+        toast.error('Unexpected response format from server')
+        console.error('Invalid upload result format:', result)
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Upload failed')

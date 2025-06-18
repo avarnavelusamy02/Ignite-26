@@ -6,14 +6,24 @@ import { Badge } from '@/components/ui/badge'
 import { studentsApi } from '@/api/students'
 import { brigadesApi } from '@/api/brigades'
 import { uploadsApi } from '@/api/uploads'
-import { Student, Brigade, PaginatedResponse } from '@/types'
-import { Search, Plus, Upload, Download, Edit, Trash2, Eye } from 'lucide-react'
+import { Student, Brigade } from '@/types'
+import { Search, Plus, Upload, Download, Edit, Trash2 } from 'lucide-react'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 import { toast } from 'sonner'
-import { formatDate } from '@/lib/utils'
+// import { formatDate } from '@/lib/utils'
 import StudentModal from '@/components/modals/StudentModal'
 import UploadStudentsModal from '@/components/modals/UploadStudentsModal'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 export default function AdminStudents() {
   const [students, setStudents] = useState<Student[]>([])
@@ -30,6 +40,36 @@ export default function AdminStudents() {
   const [showStudentModal, setShowStudentModal] = useState(false)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
+   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [studentToDelete, setStudentToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDeleteClick = (id: string) => {
+    setStudentToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!studentToDelete) return
+
+    try {
+      setIsDeleting(true)
+      await studentsApi.deleteStudent(studentToDelete)
+      toast.success('Student deleted successfully')
+      fetchStudents() // Your existing function
+      setDeleteDialogOpen(false)
+      setStudentToDelete(null)
+    } catch (error) {
+      toast.error('Failed to delete student')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+    setStudentToDelete(null)
+  }
 
   useEffect(() => {
     fetchStudents()
@@ -63,17 +103,17 @@ export default function AdminStudents() {
     }
   }
 
-  const handleDeleteStudent = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this student?')) return
+  // const handleDeleteStudent = async (id: string) => {
+  //   if (!confirm('Are you sure you want to delete this student?')) return
 
-    try {
-      await studentsApi.deleteStudent(id)
-      toast.success('Student deleted successfully')
-      fetchStudents()
-    } catch (error) {
-      toast.error('Failed to delete student')
-    }
-  }
+  //   try {
+  //     await studentsApi.deleteStudent(id)
+  //     toast.success('Student deleted successfully')
+  //     fetchStudents()
+  //   } catch (error) {
+  //     toast.error('Failed to delete student')
+  //   }
+  // }
 
   const handleDownloadTemplate = async () => {
     try {
@@ -237,7 +277,7 @@ export default function AdminStudents() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDeleteStudent(student.id)}
+                            onClick={() => handleDeleteClick(student.id)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -299,6 +339,29 @@ export default function AdminStudents() {
         brigades={brigades}
         onSuccess={handleUploadSuccess}
       />
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Student</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this student? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDeleteCancel} disabled={isDeleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
